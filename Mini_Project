@@ -1,0 +1,19 @@
+products = ["Bread","Milk","Eggs"]
+print("Hello User")
+print("Enter Leave to exit ")
+print("Enter Products to view the list ")
+print("Enter Add to add a product ")
+choice = input("What option do you want?")
+if (choice == "Leave"):
+ #Do something
+ print("Leave")
+elif choice =="Products":
+ print(products)
+ #Do something
+elif choice =="Add":
+ #more stuff
+ print("Add")
+else:
+ #do nothing
+ print("Unknown")
+#print(products)
