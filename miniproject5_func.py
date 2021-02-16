@@ -1,152 +1,200 @@
 import os
 import sys
+import csv
+from tabulate import tabulate
+
+# products = []
 
 
-# def logo():
-#     print(
-#         """
-#         *****************************
-#         *****************************
-#                 JAMSBURY\'S          
-#         *****************************
-#         *****************************
-#         """
-#     )
+# with open("product.csv","r") as file:
+#     csv_file = csv.DictReader(file)
+#     for row in csv_file:
+#         products.append(row)
 
 
-# view list
-def display_dict(dict_type, list):
+# make list into table 
+def make_list_into_table(list_type):
+    header = list_type[0].keys()
+    rows =  [x.values() for x in list_type]
+    print(tabulate(rows, header))
+    
+
+# make ID for number 
+#cannot be used in an empty list since you need to add from the previous ID
+def list_ID(list_type):
+    firstkey =list(list_type[0].keys())[0]
+    last_num = int((list_type[-1][firstkey]))
+    last_num += 1
+    return str(last_num)
+
+
+
+
+
+#Main functionality
+#------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
+
+
+# view list -- unit test done!
+def display_dict(dict_type, list_type):
     os.system("clear")
     # logo()
-    print(f"{dict_type} list")
-    for item in list:
-        print(item)
+    print(f"{dict_type} list_type")
+    make_list_into_table(list_type)
     
 
 
-# append onto list - work on data persistance
-def add_item_to_dict(dict_type, list, key_1, key_2, key_3):
+# append onto list 
+def add_item_to_dict(dict_type, list_type, key_1, key_2, key_3):
     os.system("clear")
     print(f"{dict_type} list:")
 
-    for item in list:
-        print(item)
+    make_list_into_table(list_type)
 
-    value_1 = len(list)+1
-    value_2 = input(f"What {dict_type} would you like to add?").capitalize()
+    value_1 = list_ID(list_type)
+    value_2 = input(f"What is the name of the {dict_type} would you like to add?").capitalize()
     value_3 = input(f"What is the {key_3} of the new {dict_type}?")
 
     my_dict = {
-        key_1:[],
-        key_2:[],
-        key_3:[]
+        key_1:value_1,
+        key_2:value_2,
+        key_3:value_3
         }
 
-    my_dict[key_1].append(value_1)
-    my_dict[key_2].append(value_2)
-    my_dict[key_3].append(value_3)	
-    # print(my_dict)
-    list.append(my_dict)
+    list_type.append(my_dict)
 
-    # update the file
-    # try:
-
-    #     with open("product.csv","a") as file:
-    #         writer = csv.writer(file, delimiter = ",")
-
-    #         writer.writerow(key_1,key_2,key_3)
-
-
-    # except Exception as e:
-    #     print(e)
 
     os.system("clear")
 
-    for item in list:
-        print(item)
+    make_list_into_table(list_type)
 
     print(f"\n{value_2} has been added to your {dict_type} list")
 
+    appending_to_csv_file(dict_type,value_1,value_2,value_3)
 
 
+# update list - data persistance  
+def update_item_in_dict(dict_type, list_type, key_1, key_2, key_3):
 
-# update list
-def update_item_in_dict(dict_type, list, key_1, key_2, key_3):
-    os.system("clear")
     print(f"{dict_type} list")
+    make_list_into_table(list_type)
 
-    for item in list:
-        print(item)
-
-    current_item_index = input(
+    current_item_index = int(input(
         f"What is the ID of the {dict_type} you would like to update? Or press 0 to return to {dict_type} menu."
-    ).capitalize()
+    ))
+    
     os.system("clear")
 
-    if current_item == "0":
+    if current_item_index == 0:
         pass
 
     else:
 
-        
+        try:
+            index = current_item_index - 1
+            print(list_type[index])
 
-        print("update or press enter to skip")
-        new_value_2 = input(f"What's the new {value_2} of the {list_type}?").capitalize()
+            value_2 = input(f"Please enter the new name of the {key_2} or press enter to skip").capitalize()
+            
+            if value_2 == "":
+                pass
 
-        if new_value_2 = "" :
-            pass
+            else:
+                list_type[index][key_2] = value_2
+                
+            value_3 = input(f"Please enter the {key_3} of the new {key_2} or press enter to skip")
+ 
+            if value_3 == "":
+                pass
+                os.system("clear")
+                print(list_type[index])
+            else:
+                list_type[index][key_3] = value_3
+                os.system("clear")
+                make_list_into_table(list_type)
+                print(f"{list_type} has been updated")
+            
 
-        else:
-            new_value_3 = input(f"What's the new {value_3} of the {list_type}")
+        except:
+            print(f"ID {current_item_index} does not exist")
+            print("\nplease choose an ID from the list below")
+            update_item_in_dict(dict_type, list_type, key_1, key_2, key_3)
 
-        os.system("clear")
-
-       
-       
-
-
-        
+    write_csv_file(dict_type,list_type,key_1,key_2,key_3)
 
 
 
-# delete item off list
-def delete_item_in_dict(list_type, list):
+
+
+# delete item off list 
+os.system("clear")
+def delete_item_in_dict(dict_type, list_type, key_1, key_2, key_3):
+
+
+    print(f"{dict_type} list")
+
+    make_list_into_table(list_type)
+
+    current_item_index = int(input(f"What is the ID of the {dict_type} you would like to delete? Or press 0 to return to {dict_type} menu."))
     os.system("clear")
-    print(f"{list_type} list")
-    for item in list:
-        print(item)
 
-    delete_item = input(
-        f"Which {list_type} would you like to delete? Or press 0 to return to {list_type} menu."
-    ).capitalize()
-    os.system("clear")
-    if delete_item == "0":
-        # product_menu()
-        print("hello")
+    if current_item_index == 0:
+        pass
+
     else:
+    
         try:
-            list.remove(delete_item)
-            for item in list:
-                print(item)
+            index = current_item_index - 1
+            print(list_type[index])
+            confirmation = input(f"Are you sure you want to delete this {dict_type}? Press 1 to confirm or 0 to go back to {dict_type} menu.")
 
-            print(f"\n{delete_item} has been deleted")
-        except ValueError:
-            print(f"{delete_item} does not exist")
-            print("\nplease choose from the list below")
-            for item in list:
-                print(item)
+            if confirmation == "0":
+                pass
 
-        try:
-            with open(list_type + ".txt", "w") as item_file:
-                for item in list:
-                    item_file.write(item + "\n")
+            else:
+                list_type.remove(list_type[index])
+                make_list_into_table(list_type)
 
-        except Exception as e:
-            print("Sorry, something went wrong")
-    # sub_menu()
+                print(f"\n{dict_type} {current_item_index} has been deleted")
 
 
-# main menu
-# def choice_5():
-#         os.system("clear")
-#         main_menu()
+        except:
+            print(f"ID {current_item_index} does not exist")
+            print("\nplease choose an ID from the list below")
+            delete_item_in_dict(dict_type, list_type)
+
+    write_csv_file(dict_type,list_type,key_1,key_2,key_3)
+
+
+  
+
+#data persistance
+#------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
+
+#append to a csv file
+def appending_to_csv_file(dict_type,value_1,value_2,value_3):
+    with open(dict_type + ".csv","a") as file:
+        writer = csv.writer(file, delimiter = ",")
+        writer.writerow([value_1,value_2,value_3])
+
+
+   
+def read_csv_file(dict_type,list_type):
+     with open(dict_type + "csv", "r") as file:
+        csv.file = csv.DictReader(file)
+        for row in csv.file:
+            list_type.append(row)
+
+
+
+def write_csv_file(dict_type,list_type,key_1,key_2,key_3):
+    with open(dict_type + ".csv", "w") as file:
+        writer = csv.DictWriter(file,fieldnames = [key_1, key_2, key_3])
+        writer.writeheader()
+        for row in list_type:
+            writer.writerow(row)
+
+
+
