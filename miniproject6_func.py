@@ -258,21 +258,18 @@ def create_order():
         
 
 #WORK ON THIS FIRST
-def adding_products_to_order():
+# def adding_products_to_order():
 
-    value_product = []
+#     value_product = []
 
-    products = list(input("What products would you like to order? Please enter the product IDs from the list above to select product and 0 to stop choosing"))
+#     products = input("What products would you like to order? Please enter the product IDs from the list above to select product and 0 to stop choosing")
 
-    if products = 0:
-        return
+#     while True:
+#             value_product.append(products)
 
-    # if products = "":
-    #     pass
-
-    else:
-        value_product.append(products)
-
+#         if products == "0":
+#             break
+#     print(value_product)
 
 #LINES 283/284 AND DATA HANDLING FOR ORDER_STATUS NEEDS TO BE CHECKED
 def update_order_status():
@@ -354,3 +351,6 @@ def write_csv_file(dict_type,list_type,key_1,key_2,key_3):
 #         writer.writeheader()
 #         for row in orders:
 #             writer.writerow(row)
+
+
+# adding_products_to_order()
