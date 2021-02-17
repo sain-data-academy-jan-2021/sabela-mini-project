@@ -42,6 +42,26 @@ def make_list_into_table(list_type):
     
 
 
+#add products to orders---------figure out how to not make the question repeat
+def add_products_to_order():
+
+    value_product = []
+
+    while True:
+        
+        products = int(input("What products would you like to order? Please enter the product IDs from the list above to select product and 0 to stop choosing "))
+
+        if products != 0:
+            value_product.append(products)
+            # return value_product
+
+        else:
+            break
+
+    return value_product        
+    print(f"{value_product} products have been added")
+
+
 # def updating():
 #     value = input("")
     
@@ -73,7 +93,7 @@ def display_database(list_type, columns):
 
 
 # insert into database
-def add_item_to_database(list_type, columns):
+def add_item_to_database(list_type, key_1, key_2, key_3, columns):
     os.system("clear")
 
     display_database(list_type, columns)
@@ -82,15 +102,11 @@ def add_item_to_database(list_type, columns):
     value_2 = input(f"What is the name of the {key_2} to add?").capitalize()
     value_3 = input(f"What is the price of the {key_3} to add?")
 
-    cursor = connection.cursor()
 
-    cursor.execute(f'INSERT INTO {list_type} ({key_2}, {key_3}) VALUES ("{value_2}", {value_3})')
-
-    connection.commit()
-    cursor.close()
+    connecting_to_database(f'INSERT INTO {list_type} ({key_2}, {key_3}) VALUES ("{value_2}", {value_3})')
 
     print(f"\nUpdated {list_type} list\n")
-    display_database(list_type, key_1, key_2, key_3)
+    display_database(list_type, columns)
 
 
 
@@ -210,66 +226,41 @@ def delete_item_in_database(list_type, name, columns):
 #------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------
 
-#incomplete - need to figure out product ordering
+#incomplete - data handling for couriers
 def create_order():
 
     os.system("clear")
     
     
-    value_Customer_Name = input("What is your name?").capitalize()
-    value_Customer_Address = input("What is your address?")
-    value_Customer_Phone = input("What is your phone number?")
+    value_customer_name = input("What is your name?").capitalize()
+    value_customer_address = input("What is your address?")
+    value_customer_phone = input("What is your phone number?")
 
     os.system("clear")
     
     display_database("products", product_columns)
+    value_product = add_products_to_order()
 
-    value_product = list(input("What products would you like to order? Please enter the product IDs from the list above to select product and 0 to stop choosing"))
-    
     os.system("clear")
 
-    if value_product == "0":
-        pass
+    display_database("couriers", courier_columns)
+    value_courier = int(input(f"Please select a courier using the ID from the list above?"))
 
-
-    else:
-        print("hi")
-        # cursor = connection.cursor()
-
-        # cursor.execute(f'INSERT INTO orders ("products") VALUES ("{value_product})')
-
-        # connection.commit()
-        # cursor.close()
-
-
-    # for item in couriers:
-    #     print(item)
+    order_status = "Preparing"
     
-
     
-    # value_courier = int(input(f"Please select a courier using the ID from the list above?"))
-    # if value_Courier < len(couriers)+1:
-    #     print("hi")
-        
-        
+    # cursor = connection.cursor()
 
-    # else:
-    #     print(f"{value_Courier} is an invalid ID. Please choose again")
-        
+    # cursor.execute(f'INSERT INTO orders ("order_columns") VALUES ("{value_product})')
 
-#WORK ON THIS FIRST
-# def adding_products_to_order():
+    # connection.commit()
+    # cursor.close()
 
-#     value_product = []
+    connecting_to_database(f"INSERT INTO orders ("customer_name", "customer_address", "customer_phone_number", "products", "courier_id", "order_status") VALUES ({value_customer_name}, {value_customer_address}, {value_customer_phone}, {value_product}, {value_courier}, {order_status})")
 
-#     products = input("What products would you like to order? Please enter the product IDs from the list above to select product and 0 to stop choosing")
 
-#     while True:
-#             value_product.append(products)
 
-#         if products == "0":
-#             break
-#     print(value_product)
+
 
 #LINES 283/284 AND DATA HANDLING FOR ORDER_STATUS NEEDS TO BE CHECKED
 def update_order_status():
@@ -312,45 +303,19 @@ def update_order_status():
 
 
 
-# #data persistance
+#database 
 #------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------
 
+def connecting_to_database(sql):
+
+    cursor = connection.cursor()
+
+    cursor.execute(sql)
+
+    connection.commit()
+    cursor.close()
 
 
 
 
-
-#append to a csv file
-def appending_to_csv_file(dict_type,value_1,value_2,value_3):
-    with open(dict_type + ".csv","a") as file:
-        writer = csv.writer(file, delimiter = ",")
-        writer.writerow([value_1,value_2,value_3])
-
-
-   
-def read_csv_file(dict_type,list_type):
-     with open(dict_type + "csv", "r") as file:
-        csv.file = csv.DictReader(file)
-        for row in csv.file:
-            list_type.append(row)
-
-
-
-def write_csv_file(dict_type,list_type,key_1,key_2,key_3):
-    with open(dict_type + ".csv", "w") as file:
-        writer = csv.DictWriter(file,fieldnames = [key_1, key_2, key_3])
-        writer.writeheader()
-        for row in list_type:
-            writer.writerow(row)
-
-
-# def write_csv_to_orders_file():
-#     with open("order.csv", "w") as file:
-#         writer = csv.DictWriter(file,fieldnames = ["Order_ID", "Customer_Name", "Customer_Address", "Customer_Phone", "Product", "Courier", "Order_Status"])
-#         writer.writeheader()
-#         for row in orders:
-#             writer.writerow(row)
-
-
-# adding_products_to_order()
