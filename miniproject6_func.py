@@ -28,7 +28,7 @@ cursor = connection.cursor()
 
 product_columns = ["ID","product", "price"]
 courier_columns = ["ID","courier", "phone_number"]
-order_columns = ["ID","customer_name", "customer_address", "customer_phone_number", "products", "courier_id", "order_status"]
+order_columns = ["ID","customer_name", "customer_address", "customer_phone_number", "courier_id", "order_status"]
 
 
 
@@ -53,19 +53,49 @@ def add_products_to_order():
 
         if products != 0:
             value_product.append(products)
-            # return value_product
 
         else:
             break
 
-    return value_product        
-    print(f"{value_product} products have been added")
+    return value_product
 
 
-# def updating():
-#     value = input("")
+#the updating functionality
+def updating(list_type, name, question, key, item_index):
+
+    value = input(f"Please enter the new {question} or press enter to skip ").capitalize()
+            
+    if value == "":
+        pass
+
+    else:
+
+        connecting_to_database(f"UPDATE {list_type} SET {key} = '{value}' WHERE {name}_id = '{item_index}'")
+
     
+# tabulate the display of current products, WORK ON THIS FIRST
+def updating_products_in_orders():
 
+    cursor = connection.cursor()
+    # cursor.execute(f"SELECT * FROM orders_products WHERE order_id = {order_id}")
+    cursor.execute(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = 12")
+    current_products = cursor.fetchall()
+    cursor.close()
+
+    print("These are your current products:")
+    
+    for x in current_products:
+        print(f"{x[0]}:{x[1]}") 
+   
+  
+    value = input("\nPress 1 to update your products or press enter to skip")
+
+    if value == "":
+        pass
+
+    else:
+        os.system("clear")
+        product_choice = input("Please choose \n1 to add more products to your basket \n2 to change a specific product in your basket \n3 to delete your basket and choose again")
 
 
 
@@ -110,12 +140,12 @@ def add_item_to_database(list_type, key_1, key_2, key_3, columns):
 
 
 
-# update list - completish --------datahandling if possible
+# update list
 def update_item_in_database(list_type, key_1, key_2, key_3, columns):
 
     display_database(list_type, columns)
 
-    item_index = int(input(f"What is the ID of the {list_type} you would like to update? Or press 0 to return to {list_type} menu. "))
+    item_index = int(input(f"What is the ID of the {key_2} you would like to update? Or press 0 to return to {list_type} menu. "))
     
     os.system("clear")
 
@@ -125,64 +155,37 @@ def update_item_in_database(list_type, key_1, key_2, key_3, columns):
     else:
 
         cursor = connection.cursor()
-        row_exists = cursor.execute(f"select * from {list_type} where id={item_index}")
+        row_exists = cursor.execute(f"select * from {list_type} where {key_2}_id={item_index}")
         cursor.close()
 
         if row_exists == 1:
 
-            value_2 = input(f"Please enter the new name of the {key_2} or press enter to skip ").capitalize()
-            
-            if value_2 == "":
-                pass
+            updating(list_type, key_2, f"name of the {key_2}", key_2, item_index)
 
-            else:
+            updating(list_type, key_2, key_3, key_3, item_index)
 
-                cursor = connection.cursor()
-
-                cursor.execute(f"UPDATE {list_type} SET {key_2} = '{value_2}' WHERE id = '{item_index}'")
-
-                connection.commit()
-                cursor.close()     
-
-
-            value_3 = input(f"Please enter the {key_3} of the new {key_2} or press enter to skip ")
- 
-            if value_3 == "":
-                pass
-                os.system("clear")
                 
+            os.system("clear")
 
-            else:
-
-                cursor = connection.cursor()
-
-                cursor.execute(f"UPDATE {list_type} SET {key_3} = '{value_3}' WHERE id = '{item_index}'")
-
-                connection.commit()
-                cursor.close()
-            
-                os.system("clear")
-
-                display_database(list_type, key_1, key_2, key_3)
-                print(f"{list_type} has been updated")
+            display_database(list_type, columns)
+            print(f"{list_type} has been updated")
             
 
         else:
             print(f"{key_2} {item_index} does not exist")
             print("\nplease choose an ID from the list below")
-            update_item_in_database(list_type, key_1, key_2, key_3)
+            update_item_in_database(list_type, key_1, key_2, key_3, columns)
 
 
 
 
-# delete item off list ---- completish , see if it's possible to do data handling otherwise complete, improve confirmation part
-# os.system("clear")
+# delete item off list 
 def delete_item_in_database(list_type, name, columns):
 
 
     display_database(list_type, columns)
 
-    item_index = int(input(f"What is the ID of the {list_type} you would like to delete? Or press 0 to return to {list_type} menu."))
+    item_index = int(input(f"What is the ID of the {name} you would like to delete? Or press 0 to return to {list_type} menu."))
     os.system("clear")
 
     if item_index == 0:
@@ -196,19 +199,15 @@ def delete_item_in_database(list_type, name, columns):
 
         if row_exists == 1:
 
-            confirmation = input(f"Are you sure you want to delete {list_type} {item_index}? Press 1 to confirm or 0 to go back to {list_type} menu.")
+            confirmation = input(f"Are you sure you want to delete {name} {item_index}? Press 1 to confirm or 0 to go back to {list_type} menu.")
 
             if confirmation == "0":
                 print(f"{list_type} {item_index} has not been deleted\n")
                 pass
 
             else:
-                print(row_exists)
-                cursor = connection.cursor()
-                cursor.execute(f"DELETE FROM {list_type} WHERE {name}_id ={item_index}")
 
-                connection.commit()
-                cursor.close()
+                connecting_to_database(f"DELETE FROM {list_type} WHERE {name}_id ={item_index}")
 
                 print(f"\n{list_type} {item_index} has been deleted")
 
@@ -217,7 +216,7 @@ def delete_item_in_database(list_type, name, columns):
             
             print(f"ID {item_index} does not exist")
             print("\nplease choose an ID from the list below")
-            delete_item_in_database(list_type, columns)
+            delete_item_in_database(list_type, name, columns)
             
   
 
@@ -226,7 +225,7 @@ def delete_item_in_database(list_type, name, columns):
 #------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------
 
-#incomplete - data handling for couriers
+#complete but incorporate orders_products table into th products section
 def create_order():
 
     os.system("clear")
@@ -248,21 +247,18 @@ def create_order():
 
     order_status = "Preparing"
     
+
+    connecting_to_database(f"INSERT INTO orders (customer_name, customer_address, customer_phone_number, courier_id, order_status) VALUES ('{value_customer_name}', '{value_customer_address}', '{value_customer_phone}', {value_courier}, '{order_status}')")
     
-    # cursor = connection.cursor()
-
-    # cursor.execute(f'INSERT INTO orders ("order_columns") VALUES ("{value_product})')
-
-    # connection.commit()
-    # cursor.close()
-
-    connecting_to_database(f"INSERT INTO orders ("customer_name", "customer_address", "customer_phone_number", "products", "courier_id", "order_status") VALUES ({value_customer_name}, {value_customer_address}, {value_customer_phone}, {value_product}, {value_courier}, {order_status})")
+    order_id = last_order_id()
+    
+    for product in value_product:
+        connecting_to_database(f"INSERT INTO orders_products (order_id, product_id) VALUES ({order_id}, {product})")
 
 
 
 
-
-#LINES 283/284 AND DATA HANDLING FOR ORDER_STATUS NEEDS TO BE CHECKED
+#TABULATE THE STATUS LINE 290
 def update_order_status():
     print("order list")
     display_database("orders", order_columns)
@@ -277,28 +273,83 @@ def update_order_status():
         pass
 
     else:
-        #display the specific order
-        #datahandling for item_index here
+        cursor = connection.cursor()
+        row_exists = cursor.execute(f"select * from orders where order_id={item_index}")
+        cursor.close()
 
-        status = ["Preparing", "Ready", "Out for delivery", "Delivered"]
+        if row_exists == 1:
 
-        for item in status:
-            print(item)
+            status = {
+            1:"Preparing", 
+            2:"Ready", 
+            3:"Out for delivery", 
+            4:"Delivered"
+            }
 
-        new_order_status = input("\nWhat would you like to change the order status to? Please choose from the list above ").capitalize()
-
-        if new_order_status in status:
             
-            cursor = connection.cursor()
+            print(status)
 
-            cursor.execute(f"UPDATE orders SET order_status = '{new_order_status}' WHERE order_id = '{item_index}'")
+            status_index = int(input("Please choose a status from the list above. "))
 
-            connection.commit()
-            cursor.close()
+            new_order_status = status[status_index]
+            print(new_order_status)
+    
+            connecting_to_database(f"UPDATE order SET order_status = '{new_order_status}' WHERE order_id = '{item_index}'")
+
 
         else:
-            print("Status not recognised, please choose from the list.\n")
-            pass
+            print(f"order {item_index} does not exist")
+            print("\nplease choose an ID from the list below")
+            update_order()
+          
+update_order_status()
+
+#complete - NEED TO CALL THE UPDATE PRODUCTS FUNCTION AFTER ITS FINISHED
+def update_order():
+
+    print("orders list")
+    display_database("orders", order_columns)
+
+    item_index = int(input(
+        f"What is the order ID of the order you would like to update? Or press 0 to return to order menu. "
+    ))
+    
+    os.system("clear")
+
+    if item_index == 0:
+        pass
+
+    else:
+
+        cursor = connection.cursor()
+        row_exists = cursor.execute(f"select * from orders where order_id={item_index}")
+        cursor.close()
+
+        if row_exists == 1:
+            
+            updating("orders", "order", "customer name", "customer_name", item_index)
+
+            updating("orders", "order", "customer address", "customer_address", item_index)
+
+            updating("orders", "order", "customer phone number", "customer_phone_number", item_index)
+
+            # display_database("products", product_columns)
+            # updating("orders", "order", "products", "products", item_index)
+
+            display_database("couriers", courier_columns)
+            updating("orders", "order", "courier id", "courier_id", item_index)
+            
+            
+        else:
+            print(f"order {item_index} does not exist")
+            print("\nplease choose an ID from the list below")
+            update_order()
+          
+
+     
+
+    
+
 
 
 
@@ -317,5 +368,14 @@ def connecting_to_database(sql):
     cursor.close()
 
 
+def last_order_id():
 
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT MAX(order_id) from orders")
+    order_id = cursor.fetchall()
+    
+
+    cursor.close()
+    return order_id[0][0]
 
