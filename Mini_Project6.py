@@ -36,21 +36,8 @@ from miniproject6_func import *
 
 
 
-orders = []
 
 
-with open("order.csv","r") as file:
-    csv_file = csv.DictReader(file)
-    for row in csv_file:
-        orders.append(row)
-
-# for order in orders:
-#     print(order)
-
-
-product_columns = ["ID","product", "price"]
-courier_columns = ["ID","courier", "phone_number"]
-order_columns = ["ID","customer_name", "customer_address", "customer_phone_number", "products", "courier_id", "order_status"]
 
 
 
@@ -62,6 +49,10 @@ os.system('clear')
 
 
 def app():
+
+    product_columns = ["ID","product", "price"]
+    courier_columns = ["ID","courier", "phone_number"]
+    order_columns = ["ID","customer_name", "customer_address", "customer_phone_number", "courier_id", "order_status"]
 
     while True:
         choice = input(
@@ -96,7 +87,7 @@ def app():
         
             #delete item   
             if choice_product == "4":
-                delete_item_in_database("products", "product", product_columns)
+                delete_item_in_database("products", "products", product_columns)
 
             #return to main menu
             if choice_product == "5":
@@ -165,7 +156,7 @@ def app():
                 os.system("clear")
                 display_database("orders", order_columns)
 
-            #add item ------------INCOMPLETE
+            #add item ------------COMPLETE  checkout out the database stuff at the end of the function
             if choice_order == "2":
                 create_order()
 
@@ -177,91 +168,13 @@ def app():
             #update order  ------------ INCOMPLETE
             # os.system("clear")
             if choice_order == "4":
-                print("in progress")
-                # print("orders list")
-                # make_list_into_table(orders)
+                update_order()
 
-                # current_item_index = int(input(
-                #     f"What is the order ID of the order you would like to update? Or press 0 to return to order menu. "
-                # ))
-                
-                # os.system("clear")
-
-                # if current_item_index == 0:
-                #     pass
-
-                # else:
-
-                #     try:
-                #         index = current_item_index - 1
-                #         print(orders[index])
-
-                #         value_2 = input("Please enter the new customer name of the order or press enter to skip ").capitalize
-                        
-                #         if value_2 == "":
-                #             pass
-
-                #         else:
-                #             orders[index][key_2] = value_2
-                        
-                        
-                #         value_3 = input("Please enter the new customer address of the order or press enter to skip ").capitalize
-                        
-                #         if value_3 == "":
-                #             pass
-
-                #         else:
-                #             orders[index][key_3] = value_3
-                        
-                        
-                #         value_4 = input("Please enter the new customer phone number of the order or press enter to skip ").capitalize
-                        
-                #         if value_4 == "":
-                #             pass
-
-                #         else:
-                #             orders[index][key_4] = value_4
-                        
-                        
-                #         value_5 = input("Please enter the ID of the new products of the order or press enter to skip ").capitalize
-                        
-                #         if value_5 == "":
-                #             pass
-
-                #         else:
-                #             orders[index][key_5] = value_5
-
-
-                            
-                #         value_6 = input("Please enter the ID new courier of the order press enter to skip ")
-            
-                #         if value_6 == "":
-                #             pass
-                #             os.system("clear")
-                #             print(orders[index])
-                #         else:
-                #             orders[index][key_6] = value_6
-                #             os.system("clear")
-                #             print(orders[index])
-                #             print("orders has been updated")
-                        
-
-                #     except:
-                #         print(f"ID {current_item_index} does not exist")
-                #         print("\nplease choose an ID from the list below")
-
-
-                # with open("order.csv", "w") as file:
-                #     writer = csv.DictWriter(file,fieldnames = ["Order_ID", "Customer_Name", "Customer_Address", "Customer_Phone", "Product", "Courier", "Order_Status"])
-                #     writer.writeheader()
-                #     for row in orders:
-                #         writer.writerow(row)
-            
-
+    
 
             #delete item  ---------------- COMPLETE
             if choice_order == "5":
-                delete_item_in_database("orders", "order",order_columns)
+                delete_item_in_database("orders", "order", order_columns)
 
 
             #return to main menu
