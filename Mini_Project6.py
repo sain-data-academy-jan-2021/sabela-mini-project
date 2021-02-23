@@ -67,7 +67,7 @@ def app():
         while choice == "1":
 
             choice_product = input(
-                "Enter 1 to view products \nEnter 2 to add a new product \nEnter 3 to update product \nEnter 4 to delete a product \nEnter 5 to return to main menu \nWhich option would you like?"
+                "Enter 1 to view products \nEnter 2 to add a new product \nEnter 3 to update product \nEnter 4 to delete a product \nEnter 5 to return to main menu \nWhich option would you like? "
             )
 
 
@@ -107,7 +107,7 @@ def app():
         while choice == "2":
 
             choice_courier = input(
-                "Enter 1 to view couriers \nEnter 2 to add a new courier \nEnter 3 to update courier \nEnter 4 to delete a courier \nEnter 5 to return to main menu \nWhich option would you like?"
+                "Enter 1 to view couriers \nEnter 2 to add a new courier \nEnter 3 to update courier \nEnter 4 to delete a courier \nEnter 5 to return to main menu \nWhich option would you like? "
             )
 
             
@@ -147,7 +147,7 @@ def app():
         while choice == "3":
 
             choice_order = input(
-                "Enter 1 to view orders \nEnter 2 to create a new order \nEnter 3 to update order status \nEnter 4 to update an order \nEnter 5 to delete an order \nEnter 6 to return to main menu \nWhich option would you like?"
+                "Enter 1 to view orders \nEnter 2 to create a new order \nEnter 3 to update order status \nEnter 4 to update an order \nEnter 5 to delete an order \nEnter 6 to return to main menu \nWhich option would you like? "
             )
 
 

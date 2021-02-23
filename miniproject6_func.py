@@ -29,6 +29,7 @@ cursor = connection.cursor()
 product_columns = ["ID","product", "price"]
 courier_columns = ["ID","courier", "phone_number"]
 order_columns = ["ID","customer_name", "customer_address", "customer_phone_number", "courier_id", "order_status"]
+orders_products_column = ["order_id", "product_id"]
 
 
 
@@ -46,6 +47,8 @@ def make_list_into_table(list_type):
 def add_products_to_order():
 
     value_product = []
+
+    display_database("products", product_columns)
 
     while True:
         
@@ -73,12 +76,55 @@ def updating(list_type, name, question, key, item_index):
         connecting_to_database(f"UPDATE {list_type} SET {key} = '{value}' WHERE {name}_id = '{item_index}'")
 
     
-# tabulate the display of current products, WORK ON THIS FIRST
-def updating_products_in_orders():
+def delete_product_from_orders(order_id):
+    
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = {order_id}")
+    current_products = cursor.fetchall()
+    cursor.close()
+
+    print("These are your current products:")
+
+    for x in current_products:
+        print(f"{x[0]}:{x[1]}") 
+
+    item_index = int(input(f"What is the ID of the product you would like to delete? ."))
+    os.system("clear")
+
 
     cursor = connection.cursor()
-    # cursor.execute(f"SELECT * FROM orders_products WHERE order_id = {order_id}")
-    cursor.execute(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = 12")
+    row_exists = cursor.execute(f"select * from orders_products where product_id={item_index}")
+    cursor.close()
+
+    if row_exists == 1:
+
+        confirmation = input(f"Are you sure you want to delete product {item_index}? Press 1 to confirm or 0 to return.")
+
+        if confirmation == "0":
+            print(f"product {item_index} has not been deleted\n")
+            pass
+
+        else:
+
+            connecting_to_database(f"DELETE FROM orders_products WHERE product_id ={item_index} and order_id = {order_id}")
+            print(f"\n{list_type} {item_index} has been deleted")
+
+
+    else:
+        
+        print(f"ID {item_index} does not exist")
+        print("\nplease choose an ID from the list below")
+        delete_product_from_orders()
+
+
+
+
+
+# tabulate the display of current products, WORK ON THIS FIRST
+def updating_products_in_orders(order_id):
+
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = {order_id}")
     current_products = cursor.fetchall()
     cursor.close()
 
@@ -88,14 +134,33 @@ def updating_products_in_orders():
         print(f"{x[0]}:{x[1]}") 
    
   
-    value = input("\nPress 1 to update your products or press enter to skip")
+    value = input("\nPress 1 to update your products or press enter to skip ")
 
     if value == "":
         pass
 
     else:
         os.system("clear")
-        product_choice = input("Please choose \n1 to add more products to your basket \n2 to change a specific product in your basket \n3 to delete your basket and choose again")
+        product_choice = input("Please choose \n1 to add more products to your basket \n2 to delete a specific product in your basket \n0 to return to the updating your order ")
+
+        if product_choice == "1":
+            os.system("clear")
+
+            value_product = add_products_to_order()
+            
+            for product in value_product:
+                connecting_to_database(f"INSERT INTO orders_products (order_id, product_id) VALUES ({order_id}, {product})")
+            
+
+        if product_choice == "2":
+            os.system("clear")
+            delete_product_from_orders(order_id)
+
+        if product_choice =="0":
+            pass
+
+            
+
 
 
 
@@ -122,15 +187,39 @@ def display_database(list_type, columns):
 
 
 
-# insert into database
+# insert into database - DATA HANDLING DONE
 def add_item_to_database(list_type, key_1, key_2, key_3, columns):
-    os.system("clear")
 
     display_database(list_type, columns)
-    print("\n")
 
-    value_2 = input(f"What is the name of the {key_2} to add?").capitalize()
-    value_3 = input(f"What is the price of the {key_3} to add?")
+    value_2 = input(f"What is the name of the {key_2}? ").capitalize()
+
+    if list_type == "products":
+        price = input("What is the price of the product? ")
+
+        price_check = isinstance(price,float)
+        
+        if price_check == True:
+                value_3 = "{:.2f}".format(price)
+
+        else:
+            os.system("clear")  
+            print("Invalid entry, please try again")
+            add_item_to_database(list_type, key_1, key_2, key_3, columns)
+            
+
+    if list_type == "couriers":
+        phone_number = input("What is the phone number of the courier? ")
+
+        phone_number_check = isinstance(phone_number, int)
+
+        if phone_number_check is True and len(str(phone_number)) == 11:
+            value_3 = phone_number
+
+        else:
+            os.system("clear")
+            print("Invalid entry, please try again")
+            add_item_to_database(list_type, key_1, key_2, key_3, columns)
 
 
     connecting_to_database(f'INSERT INTO {list_type} ({key_2}, {key_3}) VALUES ("{value_2}", {value_3})')
@@ -140,84 +229,95 @@ def add_item_to_database(list_type, key_1, key_2, key_3, columns):
 
 
 
-# update list
+# update list - ERROR HANDLING DONE
 def update_item_in_database(list_type, key_1, key_2, key_3, columns):
 
     display_database(list_type, columns)
 
-    item_index = int(input(f"What is the ID of the {key_2} you would like to update? Or press 0 to return to {list_type} menu. "))
-    
-    os.system("clear")
+    try:
+        item_index = int(input(f"What is the ID of the {key_2} you would like to update? Or press 0 to return to {list_type} menu. "))
+        
+        os.system("clear")
 
-    if item_index == 0:
-        pass
-
-    else:
-
-        cursor = connection.cursor()
-        row_exists = cursor.execute(f"select * from {list_type} where {key_2}_id={item_index}")
-        cursor.close()
-
-        if row_exists == 1:
-
-            updating(list_type, key_2, f"name of the {key_2}", key_2, item_index)
-
-            updating(list_type, key_2, key_3, key_3, item_index)
-
-                
-            os.system("clear")
-
-            display_database(list_type, columns)
-            print(f"{list_type} has been updated")
-            
+        if item_index == 0:
+            pass
 
         else:
-            print(f"{key_2} {item_index} does not exist")
-            print("\nplease choose an ID from the list below")
-            update_item_in_database(list_type, key_1, key_2, key_3, columns)
+
+            cursor = connection.cursor()
+            row_exists = cursor.execute(f"select * from {list_type} where {key_2}_id={item_index}")
+            cursor.close()
+
+            if row_exists == 1:
+
+                updating(list_type, key_2, f"name of the {key_2}", key_2, item_index)
+
+                updating(list_type, key_2, key_3, key_3, item_index)
+
+                    
+                os.system("clear")
+
+                display_database(list_type, columns)
+                print(f"{list_type} has been updated")
+                
+
+            else:
+                print(f"{key_2} {item_index} does not exist")
+                print("\nplease choose an ID from the list below")
+                update_item_in_database(list_type, key_1, key_2, key_3, columns)
+
+    except:
+        os.system("clear")
+        print("Invalid entry. Please try again")   
+        update_item_in_database(list_type, key_1, key_2, key_3, columns)
 
 
-
-
-# delete item off list 
+# delete item off list -----ERROR HANDLING START HERE
 def delete_item_in_database(list_type, name, columns):
 
 
     display_database(list_type, columns)
 
-    item_index = int(input(f"What is the ID of the {name} you would like to delete? Or press 0 to return to {list_type} menu."))
-    os.system("clear")
+    try:
 
-    if item_index == 0:
-        pass
+        item_index = input(f"What is the ID of the {name} you would like to delete? Or press 0 to return to {name} menu.")
+        os.system("clear")
 
-    else:
-
-        cursor = connection.cursor()
-        row_exists = cursor.execute(f"select * from {list_type} where {name}_id={item_index}")
-        cursor.close()
-
-        if row_exists == 1:
-
-            confirmation = input(f"Are you sure you want to delete {name} {item_index}? Press 1 to confirm or 0 to go back to {list_type} menu.")
-
-            if confirmation == "0":
-                print(f"{list_type} {item_index} has not been deleted\n")
-                pass
-
-            else:
-
-                connecting_to_database(f"DELETE FROM {list_type} WHERE {name}_id ={item_index}")
-
-                print(f"\n{list_type} {item_index} has been deleted")
-
+        if item_index == "0":
+            pass
 
         else:
-            
-            print(f"ID {item_index} does not exist")
-            print("\nplease choose an ID from the list below")
-            delete_item_in_database(list_type, name, columns)
-            
+
+            cursor = connection.cursor()
+            row_exists = cursor.execute(f"select * from {list_type} where {name}_id={int(item_index)}")
+            cursor.close()
+
+            if row_exists == 1:
+
+                confirmation = input(f"Are you sure you want to delete {name} {item_index}? Press 1 to confirm or 0 to go back to {list_type} menu.")
+
+                if confirmation == "0":
+                    print(f"{list_type} {item_index} has not been deleted\n")
+                    pass
+
+                else:
+
+                    connecting_to_database(f"DELETE FROM {list_type} WHERE {name}_id ={int(item_index)}")
+
+                    print(f"\n{list_type} {item_index} has been deleted")
+
+
+            else:
+                
+                print(f"ID {item_index} does not exist")
+                print("\nplease choose an ID from the list below")
+                delete_item_in_database(list_type, name, columns)
+
+    except:
+        print(f"ID {item_index} does not exist")
+        print("\nplease choose an ID from the list below")
+        delete_item_in_database(list_type, name, columns)
+    
   
 
 
@@ -237,7 +337,6 @@ def create_order():
 
     os.system("clear")
     
-    display_database("products", product_columns)
     value_product = add_products_to_order()
 
     os.system("clear")
@@ -258,7 +357,7 @@ def create_order():
 
 
 
-#TABULATE THE STATUS LINE 290
+#TABULATE THE STATUS LINE 290, DATA HANDLING FOR DICTIONARY INPUT
 def update_order_status():
     print("order list")
     display_database("orders", order_columns)
@@ -302,9 +401,9 @@ def update_order_status():
             print("\nplease choose an ID from the list below")
             update_order()
           
-update_order_status()
 
-#complete - NEED TO CALL THE UPDATE PRODUCTS FUNCTION AFTER ITS FINISHED
+
+#complete 
 def update_order():
 
     print("orders list")
@@ -333,8 +432,7 @@ def update_order():
 
             updating("orders", "order", "customer phone number", "customer_phone_number", item_index)
 
-            # display_database("products", product_columns)
-            # updating("orders", "order", "products", "products", item_index)
+            updating_products_in_orders(item_index)
 
             display_database("couriers", courier_columns)
             updating("orders", "order", "courier id", "courier_id", item_index)
