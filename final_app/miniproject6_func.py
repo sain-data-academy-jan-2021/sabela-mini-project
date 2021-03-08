@@ -34,8 +34,31 @@ orders_products_column = ["order_id", "product_id"]
 
 
 
+def logo():
+    print(
+        """
+        *****************************
+        *****************************
+              JAMS FRUITS STALL        
+        *****************************
+        *****************************
+        """
+    )
 
 
+def fetching_data(sql):
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    output = cursor.fetchall()
+    cursor.close()
+
+    return output
+
+
+def check_if_data_exists(sql):
+    cursor = connection.cursor()
+    row_exists = cursor.execute(f"select * from orders_products where product_id={item_index}")
+    cursor.close()
 
 
 #add products to orders---------DATA HANDLING FOR PRODCUTS REQUIRED
@@ -45,9 +68,11 @@ def add_products_to_order():
 
     display_database("products", product_columns)
 
-    try:
+   
 
-        while True:
+    while True:
+
+        try:
             
             products = int(input("What products would you like to order? Please enter the product IDs from the list above to select product and 0 to stop choosing "))
 
@@ -57,12 +82,15 @@ def add_products_to_order():
             else:
                 break
 
-        return value_product
+        except ValueError:
+            os.system("clear")
+            print("Invalid entry, please choose again")
+            
 
-    except ValueError:
-        os.system("clear")
-        print("Invalid entry, please choose again")
-        add_products_to_order()
+    return value_product
+    
+
+
 
 
 #the updating functionality
@@ -74,33 +102,22 @@ def updating(list_type, name, question, key, item_index):
         pass
 
     else:
-        cursor = connection.cursor()
-        row_exists = cursor.execute(f"select * from {list_type} where {name}_id={item_index}")
-        cursor.close()
 
-        if row_exists == 1:
-            connecting_to_database(f"UPDATE {list_type} SET {key} = '{value}' WHERE {name}_id = '{item_index}'")
+        connecting_to_database(f"UPDATE {list_type} SET {key} = '{value}' WHERE {name}_id = '{item_index}'")
 
-        else:
-            print("Invalid ID, please choose again.")
-            updating(list_type, name, question, key, item_index)
 
-updating("products", "product", "product", "product", 3)
 
 #ERROR AND DATA HANDLING DONE
 def delete_product_from_orders(order_id):
-    
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = {order_id}")
-    current_products = cursor.fetchall()
-    cursor.close()
+
+    current_products = fetching_data(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = {order_id}")
 
     print("These are your current products:")
 
     for x in current_products:
         print(f"{x[0]}:{x[1]}") 
 
-    try:
+    try: 
 
         item_index = int(input(f"What is the ID of the product you would like to delete? ."))
         os.system("clear")
@@ -109,6 +126,8 @@ def delete_product_from_orders(order_id):
         cursor = connection.cursor()
         row_exists = cursor.execute(f"select * from orders_products where product_id={item_index}")
         cursor.close()
+
+
 
         if row_exists == 1:
 
@@ -133,7 +152,7 @@ def delete_product_from_orders(order_id):
     except:
         os.system("clear")
         print("Invalid entry, please choose again.")
-        delete_product_from_orders(order_id)
+        
 
 
 
@@ -220,8 +239,7 @@ def display_database(list_type, columns):
     
     rows = cursor.fetchall()
     header = columns
-    # print(rows)
-    # print(header)
+
     print(tabulate(rows,header))
 
     cursor.close()
@@ -229,10 +247,11 @@ def display_database(list_type, columns):
     print("\n")
 
 
-display_database("products",product_columns)
+# add_products_to_order()
 
 # insert into database - DATA HANDLING DONE
 def add_item_to_database(list_type, key_1, key_2, key_3, columns):
+    os.system("clear")
 
     display_database(list_type, columns)
 
@@ -242,10 +261,10 @@ def add_item_to_database(list_type, key_1, key_2, key_3, columns):
     
         while True:
             try:
-                value_3 = float(input("What is the price of the new product? "))
+                price = float(input("What is the price of the new product? "))
 
-                if isinstance(value_3,float) == True:
-                    value_3 = "{:.2f}".format(value_3)
+                if isinstance(price,float) == True:
+                    value_3 = "{:.2f}".format(price)
                     break
                 
                 else:
@@ -277,10 +296,11 @@ def add_item_to_database(list_type, key_1, key_2, key_3, columns):
                 print("Invalid phone number, please enter again")
 
 
-    # connecting_to_database(f'INSERT INTO {list_type} ({key_2}, {key_3}) VALUES ("{value_2}", {value_3})')
+    connecting_to_database(f'INSERT INTO {list_type} ({key_2}, {key_3}) VALUES ("{value_2}", {value_3})')
 
-    # print(f"\nUpdated {list_type} list\n")
-    # display_database(list_type, columns)
+    os.system("clear")
+    print(f"\nUpdated {list_type} list\n")
+    display_database(list_type, columns)
 
 
 
@@ -359,7 +379,13 @@ def delete_item_in_database(list_type, name, columns):
 
                 else:
 
-                    connecting_to_database(f"DELETE FROM {list_type} WHERE {name}_id ={item_index}")
+                    if list_type == "orders":
+
+                        connecting_to_database(f"DELETE FROM orders_products WHERE order_id ={item_index}")
+                        connecting_to_database(f"DELETE FROM {list_type} WHERE {name}_id ={item_index}")
+
+                    else:
+                        connecting_to_database(f"DELETE FROM {list_type} WHERE {name}_id ={item_index}")
 
                     print(f"\n{list_type} {item_index} has been deleted")
 
@@ -472,7 +498,7 @@ def update_order_status():
 
                         new_order_status = status[status_index]
                         print("Status updated successfuly")
-                        # connecting_to_database(f"UPDATE order SET order_status = '{new_order_status}' WHERE order_id = '{item_index}'")
+                        connecting_to_database(f"UPDATE orders SET order_status = '{new_order_status}' WHERE order_id = {item_index}")
 
                         break
 
@@ -525,7 +551,7 @@ def update_order():
 
                 display_database("couriers", courier_columns)
                 updating("orders", "order", "courier id", "courier_id", item_index)
-                
+
                 
             else:
                 print(f"order {item_index} does not exist")
@@ -546,11 +572,15 @@ def update_order():
 #------------------------------------------------------------------------------------
 
 
-def view_basket():
+def order_details():
+
+    os.system("clear")
 
     display_database("orders", order_columns)
 
     order_id = input("Which order would you like to view the basket of ")
+
+    os.system("clear")
 
     cursor = connection.cursor()
     cursor.execute(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = {order_id}")
@@ -558,9 +588,13 @@ def view_basket():
     cursor.close()
 
     print("These are the products from your order:")
-    
+    product_details = []
     for x in current_products:
-        print(f"{x[0]}:{x[1]}") 
+        product_details.append(x) 
+
+    print(tabulate(product_details, headers=["product_id","product"]))
+    print("\n")
+
 
 # still need to work on this
 def price_of_transaction():
@@ -570,8 +604,10 @@ def price_of_transaction():
     current_products = cursor.fetchall()[0][0]
     cursor.close()
 
+    print(float(current_products))
 
-view_basket()
+
+
 
 #database 
 #------------------------------------------------------------------------------------
@@ -599,3 +635,31 @@ def last_order_id():
     return order_id[0][0]
 
 
+
+# price_of_transaction()
+# # view_basket()
+# cursor = connection.cursor()
+# cursor.execute(f"SELECT p.product_id, p.product FROM orders_products o INNER JOIN products p ON o.product_id = p.product_id AND o.order_id = 13")
+# current_products = cursor.fetchall()
+# cursor.close()
+
+# product_list = []
+
+# for product in current_products:
+#     product_list.append(product[0])
+
+# price_list = []
+
+# for item in product_list:
+#     cursor = connection.cursor()
+#     cursor.execute(f"SELECT price FROM products WHERE product_id = {item}")
+#     price_product = cursor.fetchall()[0][0]
+#     cursor.close()
+
+#     price_list.append(price_product)
+
+    
+
+
+
+# print(price_list)
